@@ -1,7 +1,7 @@
 # ⚡ FocusFlow
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" />
+  <img src="https://img.shields.io/badge/license-Brand%20Protected-red.svg" alt="License: FocusFlow Brand License — no rebranding" />
   <img src="https://img.shields.io/badge/dependencies-0-brightgreen.svg" alt="Zero dependencies" />
   <img src="https://img.shields.io/badge/prs-welcome-orange.svg" alt="PRs welcome" />
 </p>
@@ -61,6 +61,18 @@ focusflow/
 
 Contributions are welcome! Feel free to open an issue or submit a pull request — small improvements are just as appreciated as big features.
 
+## ™ Trademark & Branding
+
+**FocusFlow™** and its logo are the exclusive brand of **ARJ-CODEX**.
+
+You may use the FocusFlow name only to refer to this original project. You may **not**:
+
+- Rebrand or redistribute this project under any other name
+- Use the FocusFlow name or logo for your own products, domains, or marketing
+- Present a modified version as an official FocusFlow release
+
+Personal and internal use is free, and contributions to this repository are welcome — see the [License](LICENSE) for full terms.
+
 ## 📄 License
 
-Released under the [MIT License](LICENSE).
+Released under the **[FocusFlow Brand License (FBL)](LICENSE)** — free to use, protected against rebranding.
