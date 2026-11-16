@@ -1,0 +1,66 @@
+# ⚡ FocusFlow
+
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" />
+  <img src="https://img.shields.io/badge/dependencies-0-brightgreen.svg" alt="Zero dependencies" />
+  <img src="https://img.shields.io/badge/prs-welcome-orange.svg" alt="PRs welcome" />
+</p>
+
+**FocusFlow** is a beautiful, minimalist Pomodoro timer and task tracker that helps you stay in flow. No accounts, no tracking, no server — everything runs and stays in your browser.
+
+**🔗 Live demo: [arj-codex.github.io/focusflow](https://arj-codex.github.io/focusflow)**
+
+## ✨ Features
+
+- 🍅 **Pomodoro timer** — 25-minute focus sessions with automatic short (5 min) and long (15 min) breaks
+- ✅ **Task tracker** — add tasks, mark them done, and pin one as your current focus
+- 📊 **Daily stats** — sessions completed, focus minutes, and a day-streak to keep you motivated
+- 🌗 **Dark & light themes** — follows your preference, saved between visits
+- 🔔 **Alerts** — gentle chime + desktop notification when a session ends
+- ⌨️ **Keyboard shortcuts** — `Space` to start/pause, `R` to reset
+- 💾 **Private by design** — all data lives in `localStorage`; nothing ever leaves your device
+- 📱 **Responsive** — works great on desktop, tablet, and phone
+
+## 🚀 Getting Started
+
+No build step, no dependencies. Just open it:
+
+```bash
+git clone https://github.com/ARJ-CODEX/focusflow.git
+cd focusflow
+# open index.html in your browser, or serve it:
+npx serve .
+```
+
+Or simply use the [live demo](https://arj-codex.github.io/focusflow).
+
+## ⌨️ Keyboard Shortcuts
+
+| Key | Action |
+| --- | --- |
+| `Space` | Start / pause the timer |
+| `R` | Reset the current session |
+
+## 🛠 Tech Stack
+
+- **HTML5** + **CSS3** + **vanilla JavaScript (ES6+)**
+- Zero frameworks, zero dependencies, zero build tools
+- Web Audio API for the chime · SVG for the progress ring
+
+## 📂 Project Structure
+
+```
+focusflow/
+├── index.html   # Markup
+├── style.css    # Styling (themes, responsive layout)
+├── app.js       # Timer, tasks, stats, persistence
+└── README.md
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to open an issue or submit a pull request — small improvements are just as appreciated as big features.
+
+## 📄 License
+
+Released under the [MIT License](LICENSE).
