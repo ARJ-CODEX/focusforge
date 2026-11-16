@@ -18,6 +18,7 @@
         <span class="brand-name">Focus<span class="brand-accent">Flow</span></span>
       </a>
       <div class="header-actions">
+        <button id="settings-btn" class="icon-btn" title="Settings" aria-label="Open settings">⚙️</button>
         <button id="theme-toggle" class="icon-btn" title="Toggle theme" aria-label="Toggle light or dark theme">
           <span id="theme-icon">☀️</span>
         </button>
@@ -38,16 +39,14 @@
 
     <!-- ======= Timer ======= -->
     <section class="timer-card" id="timer-card" aria-label="Pomodoro timer">
-      <svg class="progress-ring" viewBox="0 0 320 320" aria-hidden="true">
-        <circle class="progress-ring-track" cx="160" cy="160" r="140" />
-        <circle class="progress-ring-bar" id="progress-bar" cx="160" cy="160" r="140" />
-      </svg>
+      <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
       <div class="timer-content">
         <p class="phase-label" id="phase-label">Ready to focus</p>
         <p class="time-display" id="time-display">25:00</p>
         <p class="active-task" id="active-task" hidden></p>
         <div class="controls">
           <button class="btn btn-primary" id="start-btn">Start</button>
+          <button class="btn btn-ghost" id="skip-btn" title="Skip to the next phase (S)">Skip</button>
           <button class="btn btn-ghost" id="reset-btn" title="Reset timer (R)">Reset</button>
         </div>
       </div>
@@ -100,6 +99,53 @@
     </footer>
 
   </main>
+
+  <!-- ======= Settings Modal ======= -->
+  <div class="modal-overlay" id="settings-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Timer settings">
+      <div class="modal-header">
+        <h2>⚙️ Settings</h2>
+        <button class="icon-btn" id="settings-close" aria-label="Close settings">✕</button>
+      </div>
+
+      <div class="settings-grid">
+        <label>Focus minutes
+          <input type="number" id="set-focus" min="1" max="90" />
+        </label>
+        <label>Short break (min)
+          <input type="number" id="set-short" min="1" max="30" />
+        </label>
+        <label>Long break (min)
+          <input type="number" id="set-long" min="1" max="60" />
+        </label>
+        <label>Long break every (sessions)
+          <input type="number" id="set-cycle" min="2" max="8" />
+        </label>
+      </div>
+
+      <div class="settings-toggles">
+        <div class="switch-row">
+          <span>Auto-start breaks</span>
+          <label class="switch">
+            <input type="checkbox" id="set-autobreak" />
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+        <div class="switch-row">
+          <span>Auto-start next focus session</span>
+          <label class="switch">
+            <input type="checkbox" id="set-autofocus" />
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-small" id="settings-cancel">Cancel</button>
+        <button class="btn btn-primary btn-small" id="settings-save">Save</button>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>

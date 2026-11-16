@@ -12,7 +12,9 @@
 
 ## ✨ Features
 
-- 🍅 **Pomodoro timer** — 25-minute focus sessions with automatic short (5 min) and long (15 min) breaks
+- 🍅 **Pomodoro timer** — focus sessions with automatic short and long breaks
+- ⚙️ **Adjustable settings** — customize focus/break durations, sessions before a long break, and auto-start behavior
+- ⏭ **Skip** — jump to the next phase anytime
 - ✅ **Task tracker** — add tasks, mark them done, and pin one as your current focus
 - 📊 **Daily stats** — sessions completed, focus minutes, and a day-streak to keep you motivated
 - 🌗 **Dark & light themes** — follows your preference, saved between visits
@@ -39,6 +41,7 @@ Or simply use the [live demo](https://arj-codex.github.io/focusflow).
 | Key | Action |
 | --- | --- |
 | `Space` | Start / pause the timer |
+| `S` | Skip to the next phase |
 | `R` | Reset the current session |
 
 ## 🛠 Tech Stack

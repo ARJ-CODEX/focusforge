@@ -6,10 +6,13 @@
 "use strict";
 
 /* ---------- Configuration ---------- */
-const DURATIONS = {
-  focus: 25 * 60,
-  short: 5 * 60,
-  long: 15 * 60,
+const DEFAULT_SETTINGS = {
+  focusMin: 25,
+  shortMin: 5,
+  longMin: 15,
+  sessionsBeforeLong: 4,
+  autoStartBreaks: true,
+  autoStartFocus: false,
 };
 
 const PHASE_LABELS = {
@@ -18,11 +21,10 @@ const PHASE_LABELS = {
   long: "Long break",
 };
 
-const RING_LENGTH = 2 * Math.PI * 140; // circumference of r=140
-
 /* ---------- State ---------- */
+let settings = { ...DEFAULT_SETTINGS };
 let mode = "focus";
-let remaining = DURATIONS[mode];
+let remaining = DEFAULT_SETTINGS.focusMin * 60;
 let timerId = null;
 
 let tasks = [];
@@ -42,9 +44,10 @@ const $ = (id) => document.getElementById(id);
 
 const timeDisplay = $("time-display");
 const phaseLabel = $("phase-label");
-const progressBar = $("progress-bar");
+const progressFill = $("progress-fill");
 const timerCard = $("timer-card");
 const startBtn = $("start-btn");
+const skipBtn = $("skip-btn");
 const resetBtn = $("reset-btn");
 const activeTaskEl = $("active-task");
 
@@ -61,6 +64,8 @@ const statSessions = $("stat-sessions");
 const statMinutes = $("stat-minutes");
 const statStreak = $("stat-streak");
 
+const settingsModal = $("settings-modal");
+
 /* ---------- Utilities ---------- */
 function todayKey() {
   return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
@@ -70,6 +75,10 @@ function formatTime(totalSeconds) {
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function durationFor(m) {
+  return settings[`${m}Min`] * 60;
 }
 
 function loadJSON(key, fallback) {
@@ -85,8 +94,19 @@ function saveJSON(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+function clampInt(value, min, max, fallback) {
+  const n = parseInt(value, 10);
+  if (Number.isNaN(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
 /* ---------- Persistence ---------- */
 function loadState() {
+  settings = Object.assign(
+    {},
+    DEFAULT_SETTINGS,
+    loadJSON("focusflow.settings", {})
+  );
   tasks = loadJSON("focusflow.tasks", []);
   selectedTaskId = loadJSON("focusflow.selectedTask", null);
   stats = loadJSON("focusflow.stats", stats);
@@ -108,9 +128,9 @@ function persistStats() {
 }
 
 /* ---------- Timer ---------- */
-function setMode(newMode, { keepPaused = false } = {}) {
+function setMode(newMode) {
   mode = newMode;
-  remaining = DURATIONS[mode];
+  remaining = durationFor(mode);
   document.body.dataset.mode = mode;
 
   document.querySelectorAll(".mode-btn").forEach((btn) => {
@@ -119,7 +139,8 @@ function setMode(newMode, { keepPaused = false } = {}) {
     btn.setAttribute("aria-selected", String(isActive));
   });
 
-  if (!keepPaused) pauseTimer(false);
+  pauseTimer(false);
+  phaseLabel.textContent = PHASE_LABELS[mode];
   render();
 }
 
@@ -138,9 +159,6 @@ function pauseTimer(updateButton = true) {
   timerId = null;
   timerCard.classList.remove("running");
   if (updateButton) startBtn.textContent = "Start";
-  if (phaseLabel.textContent.includes("…")) {
-    phaseLabel.textContent = "Paused";
-  }
 }
 
 function tick() {
@@ -163,16 +181,20 @@ function completeSession() {
 
   if (mode === "focus") {
     recordFocusSession();
-    setMode(focusCycle.count % 4 === 0 ? "long" : "short");
+    setMode(
+      stats.sessions % settings.sessionsBeforeLong === 0 ? "long" : "short"
+    );
+    if (settings.autoStartBreaks) startTimer();
   } else {
     setMode("focus");
+    if (settings.autoStartFocus) startTimer();
   }
 }
 
 /* ---------- Stats ---------- */
 function recordFocusSession() {
   stats.sessions += 1;
-  stats.focusMinutes += DURATIONS.focus / 60;
+  stats.focusMinutes += settings.focusMin;
 
   const today = todayKey();
   if (stats.lastFocusDay !== today) {
@@ -193,10 +215,12 @@ function renderStats() {
 /* ---------- Rendering ---------- */
 function render() {
   timeDisplay.textContent = formatTime(remaining);
-  document.title = `${formatTime(remaining)} · ${mode === "focus" ? "FocusFlow" : "Break — FocusFlow"}`;
+  document.title = `${formatTime(remaining)} · ${
+    mode === "focus" ? "FocusFlow" : "Break — FocusFlow"
+  }`;
 
-  const progress = 1 - remaining / DURATIONS[mode];
-  progressBar.style.strokeDashoffset = String(RING_LENGTH * (1 - progress));
+  const progress = 1 - remaining / durationFor(mode);
+  progressFill.style.width = `${(progress * 100).toFixed(1)}%`;
 }
 
 function renderActiveTask() {
@@ -261,7 +285,8 @@ function renderTasks() {
 
   for (const task of tasks) {
     const li = document.createElement("li");
-    li.className = "task-item" +
+    li.className =
+      "task-item" +
       (task.done ? " done" : "") +
       (task.id === selectedTaskId ? " selected" : "");
     li.title = "Click to focus on this task";
@@ -307,6 +332,48 @@ function toggleTheme() {
   applyTheme(next);
 }
 
+/* ---------- Settings ---------- */
+function openSettings() {
+  $("set-focus").value = settings.focusMin;
+  $("set-short").value = settings.shortMin;
+  $("set-long").value = settings.longMin;
+  $("set-cycle").value = settings.sessionsBeforeLong;
+  $("set-autobreak").checked = settings.autoStartBreaks;
+  $("set-autofocus").checked = settings.autoStartFocus;
+  settingsModal.hidden = false;
+}
+
+function closeSettings() {
+  settingsModal.hidden = true;
+}
+
+function saveSettings() {
+  settings.focusMin = clampInt(
+    $("set-focus").value, 1, 90, DEFAULT_SETTINGS.focusMin
+  );
+  settings.shortMin = clampInt(
+    $("set-short").value, 1, 30, DEFAULT_SETTINGS.shortMin
+  );
+  settings.longMin = clampInt(
+    $("set-long").value, 1, 60, DEFAULT_SETTINGS.longMin
+  );
+  settings.sessionsBeforeLong = clampInt(
+    $("set-cycle").value, 2, 8, DEFAULT_SETTINGS.sessionsBeforeLong
+  );
+  settings.autoStartBreaks = $("set-autobreak").checked;
+  settings.autoStartFocus = $("set-autofocus").checked;
+
+  saveJSON("focusflow.settings", settings);
+  closeSettings();
+
+  // If the timer is idle, apply the new duration right away.
+  if (!timerId) {
+    remaining = durationFor(mode);
+    phaseLabel.textContent = PHASE_LABELS[mode];
+  }
+  render();
+}
+
 /* ---------- Sound & notifications ---------- */
 function playChime() {
   try {
@@ -318,8 +385,12 @@ function playChime() {
       osc.type = "sine";
       osc.frequency.value = freq;
       gain.gain.setValueAtTime(0.001, ctx.currentTime + i * 0.18);
-      gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + i * 0.18 + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.5);
+      gain.gain.exponentialRampToValueAtTime(
+        0.2, ctx.currentTime + i * 0.18 + 0.05
+      );
+      gain.gain.exponentialRampToValueAtTime(
+        0.001, ctx.currentTime + i * 0.18 + 0.5
+      );
       osc.connect(gain).connect(ctx.destination);
       osc.start(ctx.currentTime + i * 0.18);
       osc.stop(ctx.currentTime + i * 0.18 + 0.55);
@@ -343,11 +414,13 @@ function notify(body) {
 
 /* ---------- Events ---------- */
 startBtn.addEventListener("click", () => {
-  if (timerId) {
-    pauseTimer();
-  } else {
-    startTimer();
-  }
+  if (timerId) pauseTimer();
+  else startTimer();
+});
+
+skipBtn.addEventListener("click", () => {
+  pauseTimer(false);
+  setMode(mode === "focus" ? "short" : "focus");
 });
 
 resetBtn.addEventListener("click", () => setMode(mode));
@@ -367,13 +440,28 @@ taskForm.addEventListener("submit", (e) => {
 
 themeToggle.addEventListener("click", toggleTheme);
 
+$("settings-btn").addEventListener("click", openSettings);
+$("settings-close").addEventListener("click", closeSettings);
+$("settings-cancel").addEventListener("click", closeSettings);
+$("settings-save").addEventListener("click", saveSettings);
+settingsModal.addEventListener("click", (e) => {
+  if (e.target === settingsModal) closeSettings();
+});
+
 document.addEventListener("keydown", (e) => {
+  if (!settingsModal.hidden) {
+    if (e.key === "Escape") closeSettings();
+    return; // don't trigger shortcuts while the modal is open
+  }
   if (e.target === taskInput) return; // don't hijack typing
+
   if (e.code === "Space") {
     e.preventDefault();
     startBtn.click();
   } else if (e.key.toLowerCase() === "r") {
     resetBtn.click();
+  } else if (e.key.toLowerCase() === "s") {
+    skipBtn.click();
   }
 });
 
@@ -381,8 +469,9 @@ document.addEventListener("keydown", (e) => {
 function init() {
   loadState();
   applyTheme(localStorage.getItem("focusflow.theme") ?? "dark");
+  remaining = durationFor(mode);
   document.body.dataset.mode = mode;
-  progressBar.style.strokeDasharray = String(RING_LENGTH);
+  phaseLabel.textContent = PHASE_LABELS[mode];
   render();
   renderTasks();
   renderActiveTask();
