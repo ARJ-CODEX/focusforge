@@ -26,6 +26,8 @@ let settings = { ...DEFAULT_SETTINGS };
 let mode = "focus";
 let remaining = DEFAULT_SETTINGS.focusMin * 60;
 let timerId = null;
+let endTime = null; // real timestamp the running session ends — immune to tab throttling
+let audioCtx = null; // single shared AudioContext (browsers cap new ones)
 
 let tasks = [];
 let selectedTaskId = null;
@@ -109,7 +111,11 @@ function loadState() {
   );
   tasks = loadJSON("focusflow.tasks", []);
   selectedTaskId = loadJSON("focusflow.selectedTask", null);
-  stats = loadJSON("focusflow.stats", stats);
+  stats = Object.assign(
+    {},
+    { date: todayKey(), sessions: 0, focusMinutes: 0, streak: 0, lastFocusDay: null },
+    loadJSON("focusflow.stats", {})
+  );
   if (stats.date !== todayKey()) {
     // New day: keep the streak only if the last focus day was yesterday.
     stats.date = todayKey();
@@ -139,14 +145,15 @@ function setMode(newMode) {
     btn.setAttribute("aria-selected", String(isActive));
   });
 
-  pauseTimer(false);
+  pauseTimer(true);
   phaseLabel.textContent = PHASE_LABELS[mode];
   render();
 }
 
 function startTimer() {
   if (timerId) return;
-  timerId = setInterval(tick, 1000);
+  endTime = Date.now() + remaining * 1000;
+  timerId = setInterval(tick, 250);
   timerCard.classList.add("running");
   startBtn.textContent = "Pause";
   phaseLabel.textContent =
@@ -162,11 +169,8 @@ function pauseTimer(updateButton = true) {
 }
 
 function tick() {
-  remaining -= 1;
-  if (remaining <= 0) {
-    remaining = 0;
-    completeSession();
-  }
+  remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+  if (remaining <= 0) completeSession();
   render();
 }
 
@@ -185,14 +189,22 @@ function completeSession() {
       stats.sessions % settings.sessionsBeforeLong === 0 ? "long" : "short"
     );
     if (settings.autoStartBreaks) startTimer();
+    else startBtn.textContent = "Start";
   } else {
     setMode("focus");
     if (settings.autoStartFocus) startTimer();
+    else startBtn.textContent = "Start";
   }
 }
 
 /* ---------- Stats ---------- */
 function recordFocusSession() {
+  // Handle the app staying open across midnight.
+  if (stats.date !== todayKey()) {
+    stats.date = todayKey();
+    stats.sessions = 0;
+    stats.focusMinutes = 0;
+  }
   stats.sessions += 1;
   stats.focusMinutes += settings.focusMin;
 
@@ -219,8 +231,13 @@ function render() {
     mode === "focus" ? "FocusFlow" : "Break — FocusFlow"
   }`;
 
-  const progress = 1 - remaining / durationFor(mode);
-  progressFill.style.width = `${(progress * 100).toFixed(1)}%`;
+  // Use fractional seconds while running so the progress bar stays smooth.
+  let secsLeft = remaining;
+  if (timerId && endTime !== null) {
+    secsLeft = (endTime - Date.now()) / 1000;
+  }
+  const progress = 1 - Math.max(0, secsLeft) / durationFor(mode);
+  progressFill.style.width = `${Math.min(100, progress * 100).toFixed(1)}%`;
 }
 
 function renderActiveTask() {
@@ -294,6 +311,11 @@ function renderTasks() {
     const check = document.createElement("span");
     check.className = "task-check";
     check.textContent = "✓";
+    check.title = "Toggle done";
+    check.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleTask(task.id);
+    });
 
     const text = document.createElement("span");
     text.className = "task-text";
@@ -377,7 +399,9 @@ function saveSettings() {
 /* ---------- Sound & notifications ---------- */
 function playChime() {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = audioCtx;
+    if (ctx.state === "suspended") ctx.resume();
     const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
     notes.forEach((freq, i) => {
       const osc = ctx.createOscillator();
@@ -419,7 +443,6 @@ startBtn.addEventListener("click", () => {
 });
 
 skipBtn.addEventListener("click", () => {
-  pauseTimer(false);
   setMode(mode === "focus" ? "short" : "focus");
 });
 
