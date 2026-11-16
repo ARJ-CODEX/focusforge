@@ -224,11 +224,92 @@ function renderStats() {
   statStreak.textContent = stats.streak;
 }
 
+/* ---------- Share card (branded, viral loop) ---------- */
+function shareStats() {
+  const w = 900;
+  const h = 500;
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const x = c.getContext("2d");
+  const font = (weight, size) =>
+    `${weight} ${size}px 'Segoe UI', system-ui, sans-serif`;
+
+  // Abyss background + red vignette
+  x.fillStyle = "#0A0A0C";
+  x.fillRect(0, 0, w, h);
+  const vignette = x.createRadialGradient(w / 2, h / 2, 80, w / 2, h / 2, 540);
+  vignette.addColorStop(0, "rgba(229, 9, 20, 0.12)");
+  vignette.addColorStop(1, "rgba(0, 0, 0, 0)");
+  x.fillStyle = vignette;
+  x.fillRect(0, 0, w, h);
+
+  // Metallic gold frame
+  const frame = x.createLinearGradient(0, 0, w, h);
+  frame.addColorStop(0, "#FFD75E");
+  frame.addColorStop(1, "#C9962C");
+  x.strokeStyle = frame;
+  x.lineWidth = 4;
+  x.strokeRect(24, 24, w - 48, h - 48);
+
+  // Brand header
+  x.textAlign = "left";
+  x.font = font(700, 44);
+  x.fillStyle = "#F5F5F7";
+  x.fillText("⚡ Focus", 56, 96);
+  x.fillStyle = "#E50914";
+  x.fillText("Forge", 56 + x.measureText("⚡ Focus").width, 96);
+
+  x.fillStyle = "#9A9AA8";
+  x.font = font(700, 16);
+  x.fillText("D A I L Y   D I S C I P L I N E   S T A T S", 56, 132);
+
+  // Stats row — streak gets the metallic gold treatment
+  const items = [
+    { v: stats.sessions, label: "SESSIONS TODAY", gold: false },
+    { v: stats.focusMinutes, label: "FOCUS MINUTES", gold: false },
+    { v: stats.streak, label: "DAY STREAK", gold: true },
+  ];
+  const bw = (w - 112) / 3;
+  items.forEach((it, i) => {
+    const cx = 56 + i * bw;
+    if (it.gold) {
+      const g = x.createLinearGradient(cx, 210, cx + 170, 210);
+      g.addColorStop(0, "#FFD75E");
+      g.addColorStop(1, "#C9962C");
+      x.fillStyle = g;
+    } else {
+      x.fillStyle = "#F5F5F7";
+    }
+    x.font = font(800, 84);
+    x.fillText(String(it.v), cx, 300);
+    x.fillStyle = "#9A9AA8";
+    x.font = font(700, 15);
+    x.fillText(it.label, cx, 340);
+  });
+
+  // Footer
+  x.fillStyle = "#9A9AA8";
+  x.font = font(600, 16);
+  x.fillText("arj-codex.github.io/focusforge", 56, h - 70);
+  const ember = x.createLinearGradient(0, h - 52, 320, h - 52);
+  ember.addColorStop(0, "#FF1E3C");
+  ember.addColorStop(1, "#FFC93C");
+  x.fillStyle = ember;
+  x.font = font(700, 16);
+  x.fillText("Forged with ⚡ by ARJ-CODEX", 56, h - 44);
+
+  const a = document.createElement("a");
+  a.download = "focusforge-stats.png";
+  a.href = c.toDataURL("image/png");
+  a.click();
+}
+
 /* ---------- Rendering ---------- */
 function render() {
   timeDisplay.textContent = formatTime(remaining);
   document.title = `${formatTime(remaining)} · ${
-    mode === "focus" ? "FocusFlow" : "Break — FocusFlow"
+    mode === "focus" ? "FocusForge" : "Break — FocusForge"
   }`;
 
   // Use fractional seconds while running so the progress bar stays smooth.
@@ -432,7 +513,7 @@ function requestNotifications() {
 
 function notify(body) {
   if ("Notification" in window && Notification.permission === "granted") {
-    new Notification("FocusFlow", { body });
+    new Notification("FocusForge", { body });
   }
 }
 
@@ -462,6 +543,7 @@ taskForm.addEventListener("submit", (e) => {
 });
 
 themeToggle.addEventListener("click", toggleTheme);
+$("share-btn").addEventListener("click", shareStats);
 
 $("settings-btn").addEventListener("click", openSettings);
 $("settings-close").addEventListener("click", closeSettings);

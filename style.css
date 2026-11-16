@@ -13,17 +13,20 @@
 
   --shadow-card: 0 10px 40px rgb(0 0 0 / 0.25);
 
-  /* Mode accent colors (overridden per mode on body[data-mode]) */
-  --accent: #f0544f;
-  --accent-soft: rgb(240 84 79 / 0.15);
+  /* ARJ brand: red = action, gold = reward */
+  --accent: #E50914;
+  --accent-soft: rgb(229 9 20 / 0.15);
+  --accent-contrast: #ffffff;
+  --gold: #FFC93C;
+  --gold-deep: #C9962C;
 
   --transition: 0.25s ease;
 }
 
 /* ---------- Theme: dark (default) ---------- */
 [data-theme="dark"] {
-  --bg-1: #0f1023;
-  --bg-2: #1a1b3a;
+  --bg-1: #0A0A0C;
+  --bg-2: #16161B;
   --surface: rgb(255 255 255 / 0.06);
   --surface-border: rgb(255 255 255 / 0.10);
   --text-1: #f4f4f8;
@@ -33,8 +36,8 @@
 
 /* ---------- Theme: light ---------- */
 [data-theme="light"] {
-  --bg-1: #eef0ff;
-  --bg-2: #dfe3ff;
+  --bg-1: #F4F4F6;
+  --bg-2: #E8E8EC;
   --surface: rgb(255 255 255 / 0.75);
   --surface-border: rgb(20 20 60 / 0.08);
   --text-1: #1c1d3a;
@@ -43,21 +46,19 @@
   --shadow-card: 0 10px 40px rgb(30 30 80 / 0.12);
 }
 
-/* ---------- Mode accents ---------- */
+/* ---------- Mode accents: Focus = signature red, Breaks = gold (rest is the reward) ---------- */
 [data-mode="focus"] {
-  --accent: #f0544f;
-  --accent-soft: rgb(240 84 79 / 0.14);
-  --glow: rgb(240 84 79 / 0.35);
+  --accent: #E50914;
+  --accent-soft: rgb(229 9 20 / 0.14);
+  --glow: rgb(229 9 20 / 0.35);
+  --accent-contrast: #ffffff;
 }
-[data-mode="short"] {
-  --accent: #2dd4a7;
-  --accent-soft: rgb(45 212 167 / 0.14);
-  --glow: rgb(45 212 167 / 0.35);
-}
+[data-mode="short"],
 [data-mode="long"] {
-  --accent: #4f8ff7;
-  --accent-soft: rgb(79 143 247 / 0.14);
-  --glow: rgb(79 143 247 / 0.35);
+  --accent: #FFC93C;
+  --accent-soft: rgb(255 201 60 / 0.14);
+  --glow: rgb(255 201 60 / 0.30);
+  --accent-contrast: #1A1200;
 }
 
 /* ---------- Base ---------- */
@@ -110,7 +111,7 @@ body {
   letter-spacing: -0.02em;
 }
 
-.brand-accent { color: var(--accent); transition: color var(--transition); }
+.brand-accent { color: #E50914; transition: color var(--transition); }
 
 .header-actions {
   display: flex;
@@ -164,7 +165,7 @@ body {
 
 .mode-btn.active {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-contrast);
   box-shadow: 0 4px 14px var(--glow);
 }
 
@@ -274,9 +275,9 @@ body {
 .btn:active { transform: scale(0.97); }
 
 .btn-primary {
-  background: var(--accent);
+  background: linear-gradient(135deg, #FF1E3C 0%, #C40812 100%);
   color: #fff;
-  box-shadow: 0 6px 18px var(--glow);
+  box-shadow: 0 6px 18px rgb(229 9 20 / 0.35);
 }
 
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--glow); }
@@ -379,7 +380,7 @@ body {
 .task-item.done .task-check {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .task-text {
@@ -445,6 +446,15 @@ body {
   font-weight: 600;
   text-align: center;
 }
+
+/* Gold treatment for the streak — gold is reserved for records */
+.stats .stat-card:last-child .stat-value {
+  background: linear-gradient(135deg, #FFD75E 0%, #C9962C 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.stats .stat-card:last-child { border-color: rgb(201 150 44 / 0.4); }
 
 /* ---------- Footer ---------- */
 .footer {

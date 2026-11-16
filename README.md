@@ -1,4 +1,4 @@
-# ⚡ FocusFlow
+# ⚡ FocusForge
 
 <p align="center">
   <img src="https://img.shields.io/badge/license-Brand%20Protected-red.svg" alt="License: FocusFlow Brand License — no rebranding" />
@@ -6,9 +6,9 @@
   <img src="https://img.shields.io/badge/prs-welcome-orange.svg" alt="PRs welcome" />
 </p>
 
-**FocusFlow** is a beautiful, minimalist Pomodoro timer and task tracker that helps you stay in flow. No accounts, no tracking, no server — everything runs and stays in your browser.
+**FocusForge** is a beautiful, minimalist Pomodoro timer and task tracker that helps you stay in flow. No accounts, no tracking, no server — everything runs and stays in your browser.
 
-**🔗 Live demo: [arj-codex.github.io/focusflow](https://arj-codex.github.io/focusflow)**
+**🔗 Live demo: [arj-codex.github.io/focusforge](https://arj-codex.github.io/focusforge)**
 
 ## ✨ Features
 
@@ -28,8 +28,8 @@
 No build step, no dependencies. Just open it:
 
 ```bash
-git clone https://github.com/ARJ-CODEX/focusflow.git
-cd focusflow
+git clone https://github.com/ARJ-CODEX/focusforge.git
+cd focusforge
 # open index.html in your browser, or serve it:
 npx serve .
 ```
@@ -53,7 +53,7 @@ Or simply use the [live demo](https://arj-codex.github.io/focusflow).
 ## 📂 Project Structure
 
 ```
-focusflow/
+focusforge/
 ├── index.html   # Markup
 ├── style.css    # Styling (themes, responsive layout)
 ├── app.js       # Timer, tasks, stats, persistence
@@ -66,9 +66,9 @@ Contributions are welcome! Feel free to open an issue or submit a pull request �
 
 ## ™ Trademark & Branding
 
-**FocusFlow™** and its logo are the exclusive brand of **ARJ-CODEX**.
+**FocusForge™** and its logo are the exclusive brand of **ARJ-CODEX**.
 
-You may use the FocusFlow name only to refer to this original project. You may **not**:
+You may use the FocusForge name only to refer to this original project. You may **not**:
 
 - Rebrand or redistribute this project under any other name
 - Use the FocusFlow name or logo for your own products, domains, or marketing
@@ -78,4 +78,4 @@ Personal and internal use is free, and contributions to this repository are welc
 
 ## 📄 License
 
-Released under the **[FocusFlow Brand License (FBL)](LICENSE)** — free to use, protected against rebranding.
+Released under the **[FocusForge Brand License (FBL)](LICENSE)** — free to use, protected against rebranding.
